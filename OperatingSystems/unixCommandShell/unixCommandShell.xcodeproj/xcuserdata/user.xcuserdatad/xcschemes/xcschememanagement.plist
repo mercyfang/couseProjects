@@ -4,7 +4,7 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
-		<key>manchen_fang.xcscheme</key>
+		<key>unixCommandShell.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
 			<integer>0</integer>
@@ -12,7 +12,7 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>CE74F6341DDCB1D10008E08A</key>
+		<key>CEAF8F7B1DDE3FC10057C497</key>
 		<dict>
 			<key>primary</key>
 			<true/>

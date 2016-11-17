@@ -14,10 +14,10 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CE74F6341DDCB1D10008E08A"
-               BuildableName = "manchen_fang"
-               BlueprintName = "manchen_fang"
-               ReferencedContainer = "container:manchen_fang.xcodeproj">
+               BlueprintIdentifier = "CEAF8F7B1DDE3FC10057C497"
+               BuildableName = "unixCommandShell"
+               BlueprintName = "unixCommandShell"
+               ReferencedContainer = "container:unixCommandShell.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,10 +32,10 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CE74F6341DDCB1D10008E08A"
-            BuildableName = "manchen_fang"
-            BlueprintName = "manchen_fang"
-            ReferencedContainer = "container:manchen_fang.xcodeproj">
+            BlueprintIdentifier = "CEAF8F7B1DDE3FC10057C497"
+            BuildableName = "unixCommandShell"
+            BlueprintName = "unixCommandShell"
+            ReferencedContainer = "container:unixCommandShell.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -55,10 +55,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CE74F6341DDCB1D10008E08A"
-            BuildableName = "manchen_fang"
-            BlueprintName = "manchen_fang"
-            ReferencedContainer = "container:manchen_fang.xcodeproj">
+            BlueprintIdentifier = "CEAF8F7B1DDE3FC10057C497"
+            BuildableName = "unixCommandShell"
+            BlueprintName = "unixCommandShell"
+            ReferencedContainer = "container:unixCommandShell.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -74,10 +74,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "CE74F6341DDCB1D10008E08A"
-            BuildableName = "manchen_fang"
-            BlueprintName = "manchen_fang"
-            ReferencedContainer = "container:manchen_fang.xcodeproj">
+            BlueprintIdentifier = "CEAF8F7B1DDE3FC10057C497"
+            BuildableName = "unixCommandShell"
+            BlueprintName = "unixCommandShell"
+            ReferencedContainer = "container:unixCommandShell.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

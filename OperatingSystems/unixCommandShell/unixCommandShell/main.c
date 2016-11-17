@@ -38,7 +38,7 @@ int main(void) {
         }
         fclose(file);
     }
-
+    
     /* if PATH or HOME not assigned. */
     if (PATH[0] == '\0' || HOME[0] == '\0') {
         strcpy(Error, "PATH or HOME is not assigned.");
@@ -106,13 +106,13 @@ void runCommand(char* command, char* PATH) {
     }
     
     /* Run the program by creating child process. */
-//    pid_t pid = fork();
-//    if (pid == 0) {
-        childProcess(programName, argv, PATH);
-//    } else {
-//        wait(&pid);
-        //parentProcess(pid);
-//    }
+    //    pid_t pid = fork();
+    //    if (pid == 0) {
+    childProcess(programName, argv, PATH);
+    //    } else {
+    //        wait(&pid);
+    //parentProcess(pid);
+    //    }
 }
 
 /* Child process needs to execute the program. */
@@ -137,7 +137,7 @@ void childProcess(char* programName, char* argv[], char* PATH) {
             
             /* Try to open the directory. */
             if ((dir = opendir(correctPath)) == NULL) {
-//                exit(1);
+                //                exit(1);
                 printf("debug: directory of PATH not found");
             } else {
                 /* Search for program. */
@@ -153,8 +153,8 @@ void childProcess(char* programName, char* argv[], char* PATH) {
             if (foundPath != 0) {
                 break;
             }
-
-
+            
+            
             strcpy(correctPath, "");
             index = 0;
         }
@@ -179,13 +179,13 @@ void childProcess(char* programName, char* argv[], char* PATH) {
         }
     }
     system("/bin/ls");
-
-//    system(programPath);
-//    execv("ls", argv);
-//    exit(0);
+    
+    //    system(programPath);
+    //    execv("ls", argv);
+    //    exit(0);
 }
 
-/* Parent process should wait until child process is completed. */ 
+/* Parent process should wait until child process is completed. */
 void parentProcess(pid_t pid) {
     wait(NULL);
 }
