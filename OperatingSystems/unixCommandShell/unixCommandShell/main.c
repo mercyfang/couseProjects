@@ -69,6 +69,25 @@ int main(void) {
                     strncpy(HOME, command + 6, (strlen(command) - 6));
                     HOME[strlen(command)-6]='\0';
                 }
+            } else if (command[0] == 'c' && command[1] == 'd') { /* If cd is called. */
+                int isChangeToHome = 1;
+                int indexOfChar = 0;
+                for (int i=2; i < strlen(command); i++) {
+                    if (command[i] != ' ') {
+                        isChangeToHome = 0;
+                        indexOfChar = i;
+                        break;
+                    }
+                }
+                if (isChangeToHome) { /* Change to Home directory by default. */
+                    if (chdir(HOME) != 0) {
+                        perror("");
+                    }
+                } else {
+                    char directory[256] = "";
+                    strncpy(directory, command + indexOfChar, (strlen(command) - indexOfChar));
+                    chdir(directory);
+                }
             } else {
                runCommand(command, PATH);
             }
