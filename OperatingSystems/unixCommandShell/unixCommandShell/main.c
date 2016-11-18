@@ -22,23 +22,28 @@ int main(void) {
     char start[6] = "";
     char pathStart[6] = "PATH=";
     char homeStart[6] = "HOME=";
+    char pathCommandStart[7] = "$PATH=";
+    char homeCommandStart[8] = "$HOME=";
     if (file == NULL) {
-        strcpy(Error, "File profile does not exist.");
+        strcpy(Error, "File named profile does not exist.");
     } else {
         /* Assign PATH and HOME from profile. */
         while (fgets(buffer, 256, file)) {
             strncpy(start, buffer, 5);
             if (strcmp(start, pathStart) == 0) {
                 strncpy(PATH, buffer+5, (strlen(buffer) - 5));
-                PATH[strlen(PATH)-1] = 0;
+                if (PATH[strlen(PATH)-1] == '\n'){
+                    PATH[strlen(PATH)-1] = '\0';
+                }
             } else if (strcmp(start, homeStart) == 0) {
                 strncpy(HOME, buffer+5, (strlen(buffer) - 5));
-                HOME[strlen(HOME)-1] = 0;
+                if (HOME[strlen(HOME)-1] == '\n'){
+                    HOME[strlen(HOME)-1] = '\0';
+                }
             }
         }
         fclose(file);
     }
-    
     /* if PATH or HOME not assigned. */
     if (PATH[0] == '\0' || HOME[0] == '\0') {
         strcpy(Error, "PATH or HOME is not assigned.");
@@ -52,7 +57,21 @@ int main(void) {
         while (1) {
             fgets(command, 256, stdin);
             command[strlen(command)-1] = 0;
-            runCommand(command, PATH);
+            /* Check command is HOME or PATH assignment. */
+            if (command[0] == pathCommandStart[0]) {
+                if (command[1] == pathCommandStart[1] && command[2] == pathCommandStart[2] && command[3] == pathCommandStart[3] && command[4] == pathCommandStart[4] && command[5] == pathCommandStart[5]) {
+                    strncpy(PATH, command + 6, (strlen(command) - 6));
+                    PATH[strlen(command)-6]='\0';
+                } else if (command[1] == homeCommandStart[1] && command[2] == homeCommandStart[2] && command[3] == homeCommandStart[3] && command[4] == homeCommandStart[4] && command[5] == homeCommandStart[5]) {
+                    for (int i=0; i < strlen(HOME); i++) {
+                        HOME[i]=0;
+                    }
+                    strncpy(HOME, command + 6, (strlen(command) - 6));
+                    HOME[strlen(command)-6]='\0';
+                }
+            } else {
+               runCommand(command, PATH);
+            }
             /* When program completes, prompt presents again. */
             displayCurrentWorkingDirectory();
         }
@@ -76,13 +95,17 @@ void runCommand(char* command, char* PATH) {
     char programName[256] = "";
     int indexOfCommand = 0;
     int numOfEmptySpace = 0;
-    char* argv[20];
+    char* argv[20] = {};
     char argument[256] = "";
     int indexOfArgumentArray;
     int indexOfEachArgument = 0;
     while (command[indexOfCommand] != '\0') {
         /* Still getting the program name. */
         if (numOfEmptySpace == 0) {
+            if (command[indexOfCommand + 1] == '\0') {
+                programName[indexOfCommand] = command[indexOfCommand];
+                argv[0] = programName;
+            }
             if (command[indexOfCommand] != ' ') {
                 programName[indexOfCommand] = command[indexOfCommand];
             } else {
@@ -91,11 +114,14 @@ void runCommand(char* command, char* PATH) {
             }
         } else {
             /* Getting the arguments from command. */
-            if (command[indexOfCommand] != ' ') {
+            if (command[indexOfCommand + 1] == '\0') {
+                argument[indexOfEachArgument] = command[indexOfCommand];
+                argv[numOfEmptySpace] = argument;
+            } else if (command[indexOfCommand] != ' ') {
                 argument[indexOfEachArgument] = command[indexOfCommand];
                 indexOfArgumentArray ++;
                 indexOfEachArgument ++;
-            } else {
+            } else if (command[indexOfCommand] == ' ') {
                 argv[numOfEmptySpace] = argument;
                 strcpy(argument, "");
                 numOfEmptySpace ++;
@@ -106,13 +132,14 @@ void runCommand(char* command, char* PATH) {
     }
     
     /* Run the program by creating child process. */
-    //    pid_t pid = fork();
-    //    if (pid == 0) {
-    childProcess(programName, argv, PATH);
-    //    } else {
-    //        wait(&pid);
-    //parentProcess(pid);
-    //    }
+    pid_t pid = fork();
+    if (pid == -1) {
+        printf("There is an error creating child process.\n");
+    } else if (pid == 0) {
+        childProcess(programName, argv, PATH);
+    } else {
+        parentProcess(pid);
+    }
 }
 
 /* Child process needs to execute the program. */
@@ -137,13 +164,15 @@ void childProcess(char* programName, char* argv[], char* PATH) {
             
             /* Try to open the directory. */
             if ((dir = opendir(correctPath)) == NULL) {
-                //                exit(1);
-                printf("debug: directory of PATH not found");
+                exit(1);
+                perror("Directory of PATH not found\n");
             } else {
                 /* Search for program. */
                 while ((dp = readdir(dir)) != NULL) {
                     if (strcmp(dp->d_name, programName) == 0) {
-                        realpath(dp->d_name, programPath);
+                        strcpy(programPath, correctPath);
+                        strcat(programPath, "/");
+                        strcat(programPath, programName);
                         closedir(dir);
                         foundPath = 1;
                         break;
@@ -153,8 +182,7 @@ void childProcess(char* programName, char* argv[], char* PATH) {
             if (foundPath != 0) {
                 break;
             }
-            
-            
+
             strcpy(correctPath, "");
             index = 0;
         }
@@ -163,26 +191,22 @@ void childProcess(char* programName, char* argv[], char* PATH) {
     /* This takes care of the case when there is no : in PATH. */
     if (numberOfC == 0) {
         if ((dir = opendir(correctPath)) == NULL) {
-            //                exit(1);
-            printf("debug: directory of PATH not found");
+            exit(1);
         } else {
             /* Search for program. */
             while ((dp = readdir(dir)) != NULL) {
                 if (strcmp(dp->d_name, programName) == 0) {
-                    printf("debug: found program.");
-                    realpath(dp->d_name, programPath);
+                    strcpy(programPath, correctPath);
+                    strcat(programPath, "/");
+                    strcat(programPath, programName);
                     closedir(dir);
                     break;
                 }
             }
-            printf("debug: did not find program");
         }
     }
-    system("/bin/ls");
-    
-    //    system(programPath);
-    //    execv("ls", argv);
-    //    exit(0);
+    execv(programPath, argv);
+    exit(0);
 }
 
 /* Parent process should wait until child process is completed. */
