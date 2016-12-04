@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CEB731161DF18484000FA076 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB731151DF18484000FA076 /* main.c */; };
+		CE950FC81DF46108006A264E /* dos.c in Sources */ = {isa = PBXBuildFile; fileRef = CE950FC41DF46108006A264E /* dos.c */; };
+		CE950FC91DF46108006A264E /* dos.o in Frameworks */ = {isa = PBXBuildFile; fileRef = CE950FC61DF46108006A264E /* dos.o */; };
+		CEB731161DF18484000FA076 /* dos_scandisk.c in Sources */ = {isa = PBXBuildFile; fileRef = CEB731151DF18484000FA076 /* dos_scandisk.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -23,8 +25,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		CE950FC11DF46108006A264E /* bootsect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bootsect.h; path = dos_scandisk.c/bootsect.h; sourceTree = "<group>"; };
+		CE950FC21DF46108006A264E /* bpb.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = bpb.h; path = dos_scandisk.c/bpb.h; sourceTree = "<group>"; };
+		CE950FC31DF46108006A264E /* direntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = direntry.h; path = dos_scandisk.c/direntry.h; sourceTree = "<group>"; };
+		CE950FC41DF46108006A264E /* dos.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = dos.c; path = dos_scandisk.c/dos.c; sourceTree = "<group>"; };
+		CE950FC51DF46108006A264E /* dos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = dos.h; path = dos_scandisk.c/dos.h; sourceTree = "<group>"; };
+		CE950FC61DF46108006A264E /* dos.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = dos.o; path = dos_scandisk.c/dos.o; sourceTree = "<group>"; };
+		CE950FC71DF46108006A264E /* fat.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = fat.h; path = dos_scandisk.c/fat.h; sourceTree = "<group>"; };
 		CEB731121DF18484000FA076 /* dos_scandisk.c */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = dos_scandisk.c; sourceTree = BUILT_PRODUCTS_DIR; };
-		CEB731151DF18484000FA076 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		CEB731151DF18484000FA076 /* dos_scandisk.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = dos_scandisk.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +41,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CE950FC91DF46108006A264E /* dos.o in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +53,13 @@
 			children = (
 				CEB731141DF18484000FA076 /* dos_scandisk.c */,
 				CEB731131DF18484000FA076 /* Products */,
+				CE950FC11DF46108006A264E /* bootsect.h */,
+				CE950FC21DF46108006A264E /* bpb.h */,
+				CE950FC31DF46108006A264E /* direntry.h */,
+				CE950FC41DF46108006A264E /* dos.c */,
+				CE950FC51DF46108006A264E /* dos.h */,
+				CE950FC61DF46108006A264E /* dos.o */,
+				CE950FC71DF46108006A264E /* fat.h */,
 			);
 			sourceTree = "<group>";
 		};
@@ -57,7 +74,7 @@
 		CEB731141DF18484000FA076 /* dos_scandisk.c */ = {
 			isa = PBXGroup;
 			children = (
-				CEB731151DF18484000FA076 /* main.c */,
+				CEB731151DF18484000FA076 /* dos_scandisk.c */,
 			);
 			path = dos_scandisk.c;
 			sourceTree = "<group>";
@@ -119,7 +136,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CEB731161DF18484000FA076 /* main.c in Sources */,
+				CE950FC81DF46108006A264E /* dos.c in Sources */,
+				CEB731161DF18484000FA076 /* dos_scandisk.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -246,6 +264,7 @@
 				CEB7311B1DF18484000FA076 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
