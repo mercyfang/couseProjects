@@ -74,31 +74,57 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
 
             if ((dirent->deAttributes & ATTR_VOLUME) != 0) {
             } else if ((dirent->deAttributes & ATTR_DIRECTORY) != 0) {
-//                // We are still going through directories.
+                // We are still going through directories.
                 file_cluster = getushort(dirent->deStartCluster);
                 clusterArray[file_cluster] = 1;
                 follow_dir(file_cluster, image_buf, bpb, clusterArray);
             } else {
-//                // When we get to a file, recursively go through all the clusters this file owns and mark them as visited in cluster array.
+                // Check if the length in the directory entry is inconsistent with the length in the FAT.
+                // FAT: a file has # clusters of 512 bytes. Totally # * 512 bytes comparing with directory entry file byte number.
+
+
+                // When we get to a file, recursively go through all the clusters this file
+                //owns and mark them as visited in cluster array.
                 uint16_t clusterOfFile = getushort(dirent->deStartCluster);
+                int countOfClusters = 0;
                 while (!is_end_of_file(clusterOfFile)) {
-//                    printf("debug middle of file cluster");
                     // Mark the entry in cluster array as visited.
+                    countOfClusters++;
                     clusterArray[clusterOfFile] = 1;
                     clusterOfFile = get_fat_entry(clusterOfFile, image_buf, bpb);
                 }
                 if (is_end_of_file(cluster)) {
+                    countOfClusters++;
                     clusterArray[clusterOfFile] = 1;
+                }
+                
+//                size = getulong(dirent->deFileSize);
+//                file_cluster = getushort(dirent->deStartCluster);
+                
+//                uint16_t countOfClusters = get_file_length(file_cluster, image_buf, bpb);
+                
+                uint32_t size_clusters = (getulong(dirent->deFileSize) + ((bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust) - 1)) / (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
+                uint32_t fat_size = countOfClusters * (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
+                if (size_clusters != countOfClusters) {
+                    printf("%s.%s %u %u\n", name, extension, getulong(dirent->deFileSize), fat_size);
+
+                
+                
+                
+//                
+//                int fileSizeInFAT = countOfClusters * (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
+//                int a= (getulong(dirent->deFileSize) + (bpb->bpbBytesPerSec * bpb->bpbSecPerClust -1))/(bpb->bpbBytesPerSec * bpb->bpbSecPerClust);
+//                if (a != fileSizeInFAT) {
+//                    printf("%s.%s %d %d\n", name,extension, getulong(dirent->deFileSize), fileSizeInFAT);
                 }
             }
             dirent++;
         }
         if (cluster == 0) {
-            // root dir is special
+            // root dir is special.
             dirent++;
         } else {
-            /* get_fat_entry returns the value from the FAT entry for
-             clusternum. */
+            // get_fat_entry returns the value from the FAT entry for clusternum.
             cluster = get_fat_entry(cluster, image_buf, bpb);
             dirent = (struct direntry*)cluster_to_addr(cluster, image_buf, bpb);
         }
@@ -254,10 +280,7 @@ int main(int argc, char** argv) {
     findLostFiles(image_buf, bpb, clusterArray, numOfClusters);
     close(fd);
     exit(0);
+    // Modify FAT to free up the clusters that are past the end of the file.
 
-    // If the length in the directory entry is inconsistent with the length in the FAT.
-        // FAT: a file has # clusters of 512 bytes. Totally # * 512 bytes comparing with directory entry file byte number.
-    
-        // Modify FAT to free up the clusters that are past the end of the file.
     return 0;
 }
