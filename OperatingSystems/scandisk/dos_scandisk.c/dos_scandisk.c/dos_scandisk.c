@@ -23,8 +23,10 @@
 #include "fat.h"
 #include "dos.h"
 
+// Offset of string to be printed for size inconsistency.
+int offset = 0;
 // This method goes through all directories and each file to do the tasks needed.
-void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* clusterArray) {
+void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* clusterArray, char* lenInconsis) {
     struct direntry *dirent;
     int d, i;
     /* cluster_to_addr returns the memory location where the memory mapped
@@ -77,11 +79,10 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
                 // We are still going through directories.
                 file_cluster = getushort(dirent->deStartCluster);
                 clusterArray[file_cluster] = 1;
-                follow_dir(file_cluster, image_buf, bpb, clusterArray);
+                follow_dir(file_cluster, image_buf, bpb, clusterArray, lenInconsis);
             } else {
                 // Check if the length in the directory entry is inconsistent with the length in the FAT.
                 // FAT: a file has # clusters of 512 bytes. Totally # * 512 bytes comparing with directory entry file byte number.
-
 
                 // When we get to a file, recursively go through all the clusters this file
                 //owns and mark them as visited in cluster array.
@@ -97,25 +98,16 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
                     countOfClusters++;
                     clusterArray[clusterOfFile] = 1;
                 }
-                
-//                size = getulong(dirent->deFileSize);
-//                file_cluster = getushort(dirent->deStartCluster);
-                
-//                uint16_t countOfClusters = get_file_length(file_cluster, image_buf, bpb);
-                
-                uint32_t size_clusters = (getulong(dirent->deFileSize) + ((bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust) - 1)) / (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
-                uint32_t fat_size = countOfClusters * (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
-                if (size_clusters != countOfClusters) {
-                    printf("%s.%s %u %u\n", name, extension, getulong(dirent->deFileSize), fat_size);
-
-                
-                
-                
-//                
-//                int fileSizeInFAT = countOfClusters * (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
-//                int a= (getulong(dirent->deFileSize) + (bpb->bpbBytesPerSec * bpb->bpbSecPerClust -1))/(bpb->bpbBytesPerSec * bpb->bpbSecPerClust);
-//                if (a != fileSizeInFAT) {
-//                    printf("%s.%s %d %d\n", name,extension, getulong(dirent->deFileSize), fileSizeInFAT);
+                // Check for file size inconsistency.
+                uint32_t fileSizeInFAT = countOfClusters * (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
+                uint32_t sizeClusters = (getulong(dirent->deFileSize) + ((bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust) - 1)) / (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
+                if (sizeClusters != countOfClusters) {
+                    // Append printed strings for file size inconsistency.
+                    int count=0;
+                    char string[50]= "";
+                    sprintf(string, "%s.%s %u %u\n", name, extension, getulong(dirent->deFileSize), fileSizeInFAT);
+                    strcat(lenInconsis, string);
+                    count++;
                 }
             }
             dirent++;
@@ -259,6 +251,7 @@ int main(int argc, char** argv) {
     if (argc < 2 || argc > 2) {
         usage();
     }
+    char lenInconsis[550] = "";
     image_buf = mmap_file(argv[1], &fd);
     bpb = check_bootsector(image_buf);
     // Create a cluster array to store another copy of FAT.
@@ -268,7 +261,7 @@ int main(int argc, char** argv) {
         clusterArray[i]=0;
     }
     // Walk directory tree and check FAT linked list for each file.
-    follow_dir(0, image_buf, bpb, clusterArray);
+    follow_dir(0, image_buf, bpb, clusterArray, lenInconsis);
     printf("Unreference:");
     for (int i=2;i<numOfClusters;i++) {
         // If the cluster are neither free in the FAT nor used in any file.
@@ -278,6 +271,8 @@ int main(int argc, char** argv) {
     }
     printf("\n");
     findLostFiles(image_buf, bpb, clusterArray, numOfClusters);
+    // Print out file size inconsistency.
+    printf("%s", lenInconsis);
     close(fd);
     exit(0);
     // Modify FAT to free up the clusters that are past the end of the file.
