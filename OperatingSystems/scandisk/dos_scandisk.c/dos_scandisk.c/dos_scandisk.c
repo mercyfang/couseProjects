@@ -32,6 +32,7 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
     /* cluster_to_addr returns the memory location where the memory mapped
      cluster actually starts */
     dirent = (struct direntry*)cluster_to_addr(cluster, image_buf, bpb);
+
     while (1) {
         for (d = 0; d < bpb->bpbBytesPerSec * bpb->bpbSecPerClust; d += sizeof(struct direntry)) {
             char name[9];
@@ -55,7 +56,7 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
                 else
                     break;
             }
-
+            
             /* remove the spaces from extensions */
             for (i = 3; i > 0; i--) {
                 if (extension[i] == ' ')
@@ -73,7 +74,7 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
                 dirent++;
                 continue;
             }
-
+            
             if ((dirent->deAttributes & ATTR_VOLUME) != 0) {
             } else if ((dirent->deAttributes & ATTR_DIRECTORY) != 0) {
                 // We are still going through directories.
@@ -83,9 +84,9 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
             } else {
                 // Check if the length in the directory entry is inconsistent with the length in the FAT.
                 // FAT: a file has # clusters of 512 bytes. Totally # * 512 bytes comparing with directory entry file byte number.
-
+                
                 // When we get to a file, recursively go through all the clusters this file
-                //owns and mark them as visited in cluster array.
+                // owns and mark them as visited in cluster array.
                 uint16_t clusterOfFile = getushort(dirent->deStartCluster);
                 int countOfClusters = 0;
                 while (!is_end_of_file(clusterOfFile)) {
@@ -103,11 +104,25 @@ void follow_dir(uint16_t cluster, uint8_t *image_buf, struct bpb33* bpb, int* cl
                 uint32_t sizeClusters = (getulong(dirent->deFileSize) + ((bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust) - 1)) / (bpb->bpbBytesPerSec) * (bpb->bpbSecPerClust);
                 if (sizeClusters != countOfClusters) {
                     // Append printed strings for file size inconsistency.
-                    int count=0;
                     char string[50]= "";
                     sprintf(string, "%s.%s %u %u\n", name, extension, getulong(dirent->deFileSize), fileSizeInFAT);
                     strcat(lenInconsis, string);
-                    count++;
+                    
+                    // Free clusters that are beyond the end of a file.
+                    uint16_t clusterOfFree = getushort(dirent->deStartCluster); // Start cluster of file.
+                    uint16_t endCluster = 0;
+                    for (int i=0; i < countOfClusters;i++){
+                        uint16_t nextCluster = get_fat_entry(clusterOfFree, image_buf, bpb);
+                        if (i==(sizeClusters-1)) { // Getting to the correct end of file.
+                            endCluster = clusterOfFree;
+                        } else if (i> (sizeClusters-1)) {
+                            // Now clusterOfFree stores the cluster that should be freed.
+                            set_fat_entry(clusterOfFree, FAT12_MASK&CLUST_FREE, image_buf, bpb);
+                        }
+                        clusterOfFree = nextCluster;
+                    }
+                    // Terminate the file correctly in the FAT.
+                    set_fat_entry(endCluster, FAT12_MASK&CLUST_EOFS, image_buf, bpb);
                 }
             }
             dirent++;
